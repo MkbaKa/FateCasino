@@ -1,0 +1,8 @@
+name: ${name}
+main: ${group}.${name}
+version: ${version}
+api-version: 1.21.11
+bootstrapper: ${group}.internal.boot.FateCasinoBootstrap
+
+authors:
+  - 'Mkbakaa'
