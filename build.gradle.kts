@@ -28,15 +28,6 @@ tasks {
         options.encoding = "UTF-8"
     }
 
-    kotlin {
-        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_1_8)
-            freeCompilerArgs.addAll(
-                "-Xexplicit-backing-fields"
-            )
-        }
-    }
-
     processResources {
         val properties = mapOf(
             "version" to rootProject.version.toString(),
@@ -66,8 +57,6 @@ tasks {
             relocate("kotlinx.coroutines.", "${rootProject.group}.libs.coroutines.")
             relocate("_COROUTINE.", "${rootProject.group}.libs._COROUTINE_.")
         }
-
-        destinationDirectory.set(File("E:\\server\\1.21.11\\plugins"))
     }
 
 }
