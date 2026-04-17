@@ -20,7 +20,4 @@ data class GameContext(
     /** 零元购 价格覆写 null 表示不覆写 */
     var priceOverride: Int? = null
 
-    /** 悬赏通缉令 被悬赏的玩家 UUID */
-    var bountyTargetId: UUID? = null
-
 }
