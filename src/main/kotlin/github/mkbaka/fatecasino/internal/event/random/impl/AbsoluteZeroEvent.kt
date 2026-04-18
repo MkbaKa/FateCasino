@@ -93,13 +93,13 @@ object AbsoluteZeroEvent : RandomEvent {
 
                     if (elapsed in 2000..<3000) {
                         val secondColor = if (isWater) Material.BLUE_WOOL else Material.RED_WOOL
-                        if (block.type != secondColor && block.type != Material.WATER && block.type != Material.LAVA) {
+                        if (block.type != secondColor && block.type != Material.ICE && block.type != Material.LAVA) {
                             block.type = secondColor
                         }
                     } else if (elapsed >= 3000) {
-                        val liquid = if (isWater) Material.WATER else Material.LAVA
-                        if (block.type != liquid) {
-                            block.type = liquid
+                        val finalBlock = if (isWater) Material.ICE else Material.LAVA
+                        if (block.type != finalBlock) {
+                            block.type = finalBlock
                         }
                     }
                 }
@@ -111,8 +111,8 @@ object AbsoluteZeroEvent : RandomEvent {
         // 隐藏 BossBar
         bossBar.hide()
 
-        // 阶段2: 继续更新方块直到全部变成液体
-        val transformDurationMs = 3000L // 方块变成液体需要3秒
+        // 阶段2: 继续更新方块直到全部变成最终状态
+        val transformDurationMs = 3000L // 方块变成最终状态需要3秒
         val latestBlockStartTime = blockStates.values.maxOfOrNull { it.first } ?: 0L
         val transformEndTime = latestBlockStartTime + transformDurationMs
 
@@ -126,13 +126,13 @@ object AbsoluteZeroEvent : RandomEvent {
 
                     if (elapsed in 2000..<3000) {
                         val secondColor = if (isWater) Material.BLUE_WOOL else Material.RED_WOOL
-                        if (block.type != secondColor && block.type != Material.WATER && block.type != Material.LAVA) {
+                        if (block.type != secondColor && block.type != Material.ICE && block.type != Material.LAVA) {
                             block.type = secondColor
                         }
                     } else if (elapsed >= 3000) {
-                        val liquid = if (isWater) Material.WATER else Material.LAVA
-                        if (block.type != liquid) {
-                            block.type = liquid
+                        val finalBlock = if (isWater) Material.ICE else Material.LAVA
+                        if (block.type != finalBlock) {
+                            block.type = finalBlock
                         }
                     }
                 }
