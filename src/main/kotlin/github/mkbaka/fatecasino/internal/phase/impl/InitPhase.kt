@@ -10,15 +10,22 @@ import github.mkbaka.fatecasino.internal.util.logEx
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asDeferred
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.Difficulty
-import org.bukkit.GameRules
-import org.bukkit.Location
-import org.bukkit.World
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
+import org.bukkit.*
 import org.bukkit.block.Block
+import org.bukkit.entity.Display
+import org.bukkit.entity.TextDisplay
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.Boolean
+import kotlin.Int
+import kotlin.String
+import kotlin.Throwable
+import kotlin.Unit
+import kotlin.error
+import kotlin.let
 import kotlin.math.max
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
@@ -101,6 +108,41 @@ class InitPhase(
             val border = context.world.worldBorder
             border.setCenter(lobby.x, lobby.z)
             border.size = context.config.lobby.borderSize
+
+            // 有人想要规则介绍
+            context.world.spawn(
+                lobby.clone().add(0.0, 0.5, 0.0),
+                TextDisplay::class.java
+            ) { display ->
+                display.text(
+                    Component.empty()
+                        .append(
+                            Component.text("命运赌场")
+                                .color(NamedTextColor.YELLOW)
+                        )
+                        .append(Component.newline())
+                        .append(Component.newline())
+                        .append(
+                            Component.text("赌上这条性命")
+                                .color(TextColor.color(139, 0, 0))
+                        )
+                        .append(Component.newline())
+                        .append(
+                            Component.text("去给高台上的看客演一出好戏吧!")
+                                .color(TextColor.color(139, 0, 0))
+                        )
+                        .append(Component.newline())
+                        .append(Component.newline())
+                        .append(
+                            Component.text("没有任何规则!")
+                                .color(TextColor.color(255, 140, 0))
+                        )
+                )
+
+                display.billboard = Display.Billboard.CENTER
+                display.isSeeThrough = true
+                display.backgroundColor = Color.fromARGB(0x00)
+            }
         }
 
         try {

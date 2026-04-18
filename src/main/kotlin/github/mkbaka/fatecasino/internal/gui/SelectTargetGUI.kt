@@ -40,8 +40,8 @@ object SelectTargetGUI {
 
             pageItems.withIndex().forEach { (index, session) ->
                 slot(10 + index, buildHead(session)) {
-                    onSelect(session.owner)
                     close()
+                    onSelect(session.owner)
                 }
             }
 

@@ -57,6 +57,10 @@ tasks {
             relocate("kotlinx.coroutines.", "${rootProject.group}.libs.coroutines.")
             relocate("_COROUTINE.", "${rootProject.group}.libs._COROUTINE_.")
         }
+
+        if (isDev) {
+            destinationDirectory.set(File("E:\\server\\1.21.11\\plugins"))
+        }
     }
 
 }

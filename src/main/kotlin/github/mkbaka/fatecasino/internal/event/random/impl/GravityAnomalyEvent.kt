@@ -25,7 +25,7 @@ object GravityAnomalyEvent : RandomEvent {
     override val phase: GamePhase
         get() = GamePhase.EARLY
 
-    override val weight: Int = 3
+    override val weight: Int = 2
 
     override suspend fun execute(context: GameContext, scope: CoroutineScope) {
         val active = context.playerSessions.values.filter { it.isActive }

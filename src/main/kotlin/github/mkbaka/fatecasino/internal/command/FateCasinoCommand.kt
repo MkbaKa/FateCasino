@@ -16,6 +16,9 @@ import github.mkbaka.fatecasino.internal.phase.manager.RandomEventManager
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import kotlinx.coroutines.launch
+import github.mkbaka.fatecasino.internal.misc.QuantumChestplate
+import github.mkbaka.fatecasino.internal.misc.RandomSword
+import github.mkbaka.fatecasino.internal.misc.SlotMachineBow
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
@@ -52,7 +55,7 @@ object FateCasinoCommand {
                 )
         ).then(
             Commands.literal("event")
-                .requires { FateCasino.isDev }
+                .requires { FateCasino.isDev || it.sender.isOp }
                 .then(
                     Commands.argument<String>(
                         "name",
@@ -63,12 +66,12 @@ object FateCasinoCommand {
                         }
                         builder.buildFuture()
                     }.executes { ctx ->
-                        triggerEvent(ctx,)
+                        triggerEvent(ctx)
                     }
                 )
         ).then(
             Commands.literal("reward")
-                .requires { FateCasino.isDev }
+                .requires { FateCasino.isDev || it.sender.isOp }
                 .then(
                     Commands.literal("ticket")
                         .then(
@@ -165,6 +168,23 @@ object FateCasinoCommand {
                                 .executes { ctx -> executeReward(ctx, RewardType.SPECIAL) }
                         )
                 )
+                .then(
+                    Commands.literal("powerful")
+                        .then(
+                            Commands.argument<String>("type", StringArgumentType.string())
+                                .suggests { _, builder ->
+                                    builder.suggest("RandomSword")
+                                    builder.suggest("SlotMachineBow")
+                                    builder.suggest("QuantumChestplate")
+                                    builder.buildFuture()
+                                }
+                                .executes { ctx -> executeReward(ctx, RewardType.POWERFUL) }
+                                .then(levelArgument())
+                                .executes { ctx -> executeReward(ctx, RewardType.POWERFUL) }
+                                .then(phaseArgument())
+                                .executes { ctx -> executeReward(ctx, RewardType.POWERFUL) }
+                        )
+                )
         )
         .build()
 
@@ -201,7 +221,7 @@ object FateCasinoCommand {
     // ===== Reward 测试命令辅助函数 =====
 
     private enum class RewardType {
-        TICKET, ITEM, HEAL, EFFECT, DAMAGE, SPECIAL
+        TICKET, ITEM, HEAL, EFFECT, DAMAGE, SPECIAL, POWERFUL
     }
 
     private fun levelArgument() = Commands.argument<String>("level", StringArgumentType.string())
@@ -258,7 +278,7 @@ object FateCasinoCommand {
                 } catch (_: Exception) {
                     1
                 }
-                RewardEvent.Item(material, count)
+                RewardEvent.SimpleItem(material, count)
             }
 
             RewardType.HEAL -> {
@@ -299,6 +319,28 @@ object FateCasinoCommand {
                     RewardEvent.Special.Action.THUNDER_ALL
                 }
                 RewardEvent.Special(action)
+            }
+
+            RewardType.POWERFUL -> {
+                val typeName = ctx.getArgument<String>("type", String::class.java)
+                when (typeName) {
+                    "RandomSword" -> RewardEvent.PowerfulItem(
+                        nameSupplier = { RandomSword.name },
+                        itemSupplier = { RandomSword.getter }
+                    )
+                    "SlotMachineBow" -> RewardEvent.PowerfulItem(
+                        nameSupplier = { SlotMachineBow.name },
+                        itemSupplier = { SlotMachineBow.getter }
+                    )
+                    "QuantumChestplate" -> RewardEvent.PowerfulItem(
+                        nameSupplier = { QuantumChestplate.name },
+                        itemSupplier = { QuantumChestplate.getter }
+                    )
+                    else -> RewardEvent.PowerfulItem(
+                        nameSupplier = { RandomSword.name },
+                        itemSupplier = { RandomSword.getter }
+                    )
+                }
             }
         }
 

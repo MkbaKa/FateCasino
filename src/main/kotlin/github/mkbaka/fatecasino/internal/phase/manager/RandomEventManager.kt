@@ -14,6 +14,8 @@ import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import java.util.EnumMap
 import java.util.concurrent.ThreadLocalRandom
 
@@ -29,7 +31,6 @@ class RandomEventManager(
             BlindGlowEvent,
             InflationEvent,
             FreeShoppingEvent,
-            BountyEvent,
             RobinHoodEvent,
             AirdropEvent,
             BlindBoxEvent,
@@ -71,6 +72,15 @@ class RandomEventManager(
                 context.world.difficulty = context.config.playing.difficulty
                 // 打开摔伤
                 context.world.setGameRule(GameRules.FALL_DAMAGE, true)
+
+                // 永久夜视
+                context.playerSessions.values.filter { it.isActive }
+                    .forEach { session ->
+                        val player = session.playerOrNull ?: return@forEach
+                        player.addPotionEffect(
+                            PotionEffect(PotionEffectType.NIGHT_VISION, PotionEffect.INFINITE_DURATION, 0, false, false, true)
+                        )
+                    }
             }
 
             while (isActive) {
@@ -112,12 +122,17 @@ class RandomEventManager(
     }
 
     private fun weightedRandom(events: List<RandomEvent>): RandomEvent {
+        // 打乱事件顺序
+        // 避免每次随机事件时
+        // for 都按固定顺序导致每轮基本都是一样的事件
+        val shuffled = events.shuffled()
+
         // 把所有事件的权重合并后 基于总权重随机一个数值
         // 拿到的数值就是 权重区间
-        val total = events.sumOf { it.weight }
+        val total = shuffled.sumOf { it.weight }
         var random = random.nextInt(total)
 
-        for (event in events) {
+        for (event in shuffled) {
             // 如果区间减去事件权重还有剩余值 说明随机到的区间不是这个事件的权重区间
             // 当结果小于 0 后 说明事件区间没有被全消费完
             // 那么随机命中的结果就应该是这片区间
@@ -126,7 +141,7 @@ class RandomEventManager(
         }
 
         // 以防万一
-        return events.last()
+        return shuffled.last()
     }
 
     private suspend fun triggerEvent(event: RandomEvent) {

@@ -21,6 +21,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.boss.BarColor
+import org.bukkit.entity.Player
 
 object SpiritAvatarEvent : RandomEvent {
 
@@ -87,15 +88,7 @@ object SpiritAvatarEvent : RandomEvent {
 
         // 清理属性修改
         withContext(NonCancellable + ServerThreadDispatcher) {
-            val scaleAttr = player.getAttribute(Attribute.SCALE)!!
-            val entityRangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)!!
-            val blockRangeAttr = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)!!
-            val attackDamageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE)!!
-
-            scaleAttr.removeModifier(SCALE_KEY)
-            entityRangeAttr.removeModifier(ENTITY_RANGE_KEY)
-            blockRangeAttr.removeModifier(BLOCK_RANGE_KEY)
-            attackDamageAttr.removeModifier(ATTACK_DAMAGE_KEY)
+            cleanup(player)
         }
 
         Component.empty()
@@ -104,4 +97,17 @@ object SpiritAvatarEvent : RandomEvent {
             .append(Component.text("   真身效果已消散...").color(NamedTextColor.GRAY))
             .broadcast()
     }
+
+    fun cleanup(player: Player) {
+        val scaleAttr = player.getAttribute(Attribute.SCALE)!!
+        val entityRangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)!!
+        val blockRangeAttr = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)!!
+        val attackDamageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE)!!
+
+        scaleAttr.removeModifier(SCALE_KEY)
+        entityRangeAttr.removeModifier(ENTITY_RANGE_KEY)
+        blockRangeAttr.removeModifier(BLOCK_RANGE_KEY)
+        attackDamageAttr.removeModifier(ATTACK_DAMAGE_KEY)
+    }
+
 }

@@ -13,10 +13,9 @@ import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Creeper
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -52,7 +51,7 @@ sealed class RewardEvent {
     /**
      * 物品奖励
      */
-    data class Item(
+    data class SimpleItem(
         val material: Material,
         val count: Int = 1,
         val enchantments: Map<Enchantment, Int> = emptyMap()
@@ -79,6 +78,26 @@ sealed class RewardEvent {
             )
             player.giveItem(stack)
         }
+    }
+
+    /**
+     * 高级物品
+     */
+    data class PowerfulItem(
+        val nameSupplier: () -> Component,
+        val itemSupplier: () -> ItemStack
+    ) : RewardEvent() {
+        override val name: Component
+            get() = nameSupplier()
+        override fun execute(
+            player: Player,
+            level: RewardLevel,
+            phase: SlotMachinePhase
+        ) {
+            val item = itemSupplier()
+            player.giveItem(item)
+        }
+
     }
 
     /**

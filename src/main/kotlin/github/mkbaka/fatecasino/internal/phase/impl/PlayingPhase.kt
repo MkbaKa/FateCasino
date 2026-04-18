@@ -1,5 +1,6 @@
 package github.mkbaka.fatecasino.internal.phase.impl
 
+import github.mkbaka.fatecasino.internal.phase.manager.BountyManager
 import github.mkbaka.fatecasino.internal.phase.manager.BorderManager
 import github.mkbaka.fatecasino.internal.phase.manager.RandomEventManager
 import github.mkbaka.fatecasino.internal.phase.manager.SimpleJobManager
@@ -19,7 +20,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.meta.FireworkMeta
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
@@ -41,6 +41,8 @@ class PlayingPhase(
 
     private val mutex = Mutex()
     private var pendingEndJob: Job? = null
+
+    val bountyManager = BountyManager(context, scope)
 
     override suspend fun onStart() {
         info("进入游戏阶段...")
@@ -85,6 +87,7 @@ class PlayingPhase(
         randomEventManager.start()
         borderManager.start()
         simpleJobManager.start()
+        bountyManager.start(this)
     }
 
     override suspend fun runPhase(): AbstractGamePhase? {
@@ -106,6 +109,7 @@ class PlayingPhase(
         randomEventManager.stop()
         borderManager.stop()
         simpleJobManager.stop()
+        bountyManager.clearAll()
         unregisterListener(this)
         alivePlayers.clear()
         scope.callSync {
@@ -194,8 +198,8 @@ class PlayingPhase(
             )
 
             repeat(8) {
-                // 0.8-1.2秒间隔
-                delay(800L + random.nextInt(0, 400))
+                // 0.5-0.8秒间隔
+                delay(500L + random.nextInt(0, 300))
 
                 scope.callSync {
                     val player = winner.playerOrNull ?: return@callSync

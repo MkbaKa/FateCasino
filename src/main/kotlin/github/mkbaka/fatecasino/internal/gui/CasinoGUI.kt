@@ -1,6 +1,8 @@
 package github.mkbaka.fatecasino.internal.gui
 
+import github.mkbaka.fatecasino.internal.phase.manager.Bounty
 import github.mkbaka.fatecasino.internal.game.GameManager
+import github.mkbaka.fatecasino.internal.phase.impl.PlayingPhase
 import github.mkbaka.fatecasino.internal.gui.slotmachine.SlotMachineSession
 import github.mkbaka.fatecasino.internal.menu.Menu
 import github.mkbaka.fatecasino.internal.menu.menu
@@ -12,6 +14,7 @@ import github.mkbaka.fatecasino.internal.util.session
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
@@ -21,7 +24,7 @@ object CasinoGUI {
     val menu: Menu = menu {
         pattern(
             "#########",
-            "###1#2###",
+            "##T#B#S##",
             "#########"
         )
 
@@ -35,7 +38,7 @@ object CasinoGUI {
         )
 
         slot(
-            '1',
+            'T',
             buildItem(
                 material = Material.IRON_INGOT,
                 meta = {
@@ -56,7 +59,67 @@ object CasinoGUI {
         ) { open(TrojanGiftGUI.menu) }
 
         slot(
-            '2',
+            'B',
+            buildItem(
+                material = Material.GOLD_INGOT,
+                meta = {
+                    Component.empty()
+                        .append(Component.text("悬赏入口"))
+                        .color(NamedTextColor.GOLD)
+                        .let { customName(it) }
+
+                    Component.empty()
+                        .append(Component.text("   发布悬赏追杀目标").color(NamedTextColor.GRAY))
+                        .let { lore(listOf(it)) }
+                }
+            )
+        ) {
+            val session = player.session
+            if (session == null) {
+                Component.text("你不在这场游戏中")
+                    .sendMessage(player)
+                return@slot
+            }
+
+            open(SelectTargetGUI.createMenu(player.uniqueId) { targetId ->
+                val target = Bukkit.getPlayer(targetId)
+                if (target == null) {
+                    Component.text("目标玩家不在线")
+                        .sendMessage(player)
+                    return@createMenu
+                }
+
+                open(BountyAmountGUI.createMenu(target.name) { amount ->
+                    val phase = GameManager.currentPhase as? PlayingPhase
+                    if (phase == null) {
+                        Component.text("当前阶段无法悬赏玩家")
+                            .sendMessage(player)
+                        return@createMenu
+                    }
+
+                    session.consumeThen(
+                        amount,
+                        then = {
+                            val bounty = Bounty(
+                                issuerId = player.uniqueId,
+                                issuerName = player.name,
+                                targetId = targetId,
+                                targetName = target.name,
+                                amount = amount
+                            )
+                            phase.bountyManager.registerBounty(bounty)
+                        },
+                        deny = {
+                            Sound.ENTITY_VILLAGER_NO.playSound(player, SoundCategory.MASTER, 1.0f, 1.0f)
+                            Component.text("命运券不足").sendMessage(player)
+                        }
+                    )
+                })
+            })
+        }
+
+        slot(
+            'S',
             buildItem(
                 material = Material.DIAMOND,
                 meta = {

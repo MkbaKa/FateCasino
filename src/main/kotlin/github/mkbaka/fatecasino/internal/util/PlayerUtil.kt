@@ -1,5 +1,6 @@
 package github.mkbaka.fatecasino.internal.util
 
+import github.mkbaka.fatecasino.internal.event.random.impl.SpiritAvatarEvent
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
@@ -29,6 +30,8 @@ fun Player.reset() {
     for (effect in activePotionEffects) {
         removePotionEffect(effect.type)
     }
+
+    SpiritAvatarEvent.cleanup(this)
 }
 
 fun Player.giveItem(itemStack: ItemStack) {

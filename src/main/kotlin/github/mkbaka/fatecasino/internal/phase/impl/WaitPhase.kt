@@ -17,6 +17,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -82,6 +83,10 @@ class WaitPhase(
                 // 第一次点击 记录时间
                 sneakCache[player.uniqueId] = now
             }
+        }
+
+        on<PlayerRespawnEvent>(listener = this) {
+            respawnLocation = context.lobbyLocation!!
         }
     }
 
